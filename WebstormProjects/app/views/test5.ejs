@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Simple Image Service</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.15/esri/css/esri.css" />
+
+    <style>
+        #map { height: 90%; width: 70%; margin: 0; padding: 0; }
+        #sousuo{height: 110px;width: 120px}
+    </style>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+
+
+
+    <script src="https://js.arcgis.com/3.15/"></script>
+
+    <script>
+        //var url="http://sampleserver6.arcgisonline.com/arcgis/rest/services/Toronto/ImageServer";
+        function sou(){
+            //var formData = new FormData($("#frmUploadFile")[0]);
+            //var req=XMLHttpRequest;
+            var id= $("#text1").val();
+            //var id=123;
+            $.ajax({
+                url: '/sou',
+                type: 'get',
+                //data: {id:$('#test1').val()},
+                // data: {id:"123"},
+                //data:"name="+id+"&location=Boston",
+                data:"name="+id+"&location=Boston",
+                async: false,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function(data){
+                    if(200 === data.code) {
+                        //$("#banner").attr('src', data.msg.url);
+                        //$("#spanMessage").html("success");
+                        //$("#spanMessage").html(data.msg.url);
+                        //var map;
+                        //var url="http://sampleserver6.arcgisonline.com/arcgis/rest/services/Toronto/ImageServer";
+                        var url=data.msg.url;
+                        require([
+                            //"esri/map", "esri/layers/ArcGISImageServiceLayer",
+                            //"esri/layers/ImageServiceParameters", "dojo/parser", "dojo/domReady!"
+                            "esri/layers/ArcGISImageServiceLayer","esri/layers/ImageServiceParameters"
+
+                        ], function(
+                                //Map, ArcGISImageServiceLayer,
+                                //ImageServiceParameters, parser
+                                ArcGISImageServiceLayer,ImageServiceParameters
+                        ) {
+                            //parser.parse();
+
+                            //map = new Map("map", {
+                               // basemap: "topo",
+                               // center: [-79.40, 43.64],
+                               // zoom: 12
+                           // });
+
+                            var params = new ImageServiceParameters();
+                            params.noData = 0;
+
+                            var imageServiceLayer = new ArcGISImageServiceLayer(url, {
+                                imageServiceParameters: params,
+                                opacity: 0.75
+                            });
+                            map.addLayer(imageServiceLayer);
+                        });
+                        //url=data.msg.url;
+                         //url="http://sampleserver6.arcgisonline.com/arcgis/rest/services/Toronto/ImageServer";
+
+
+                    } else {
+                        $("#spanMessage").html("fail");
+                    }
+                    console.log('imgUploader upload success, data:', data);
+                },
+                error: function(){
+                    $("#spanMessage").html("mistake");
+                }
+            });
+        }
+        var map;
+        //var url="http://sampleserver6.arcgisonline.com/arcgis/rest/services/Toronto/ImageServer";
+
+        require([
+            "esri/map",
+             "dojo/parser", "dojo/domReady!"
+        ], function(
+                Map,
+                 parser
+        ) {
+            parser.parse();
+
+            map = new Map("map", {
+                basemap: "topo",
+                center: [-79.40, 43.64],
+                zoom: 12
+            });
+
+
+        });
+
+
+    </script>
+
+</head>
+
+<body>
+
+<div id="map" > </div>
+
+<form class = "form-horizontal"  method='post' action='javascript:' role = "form" id = "frmUploadFile">
+    <div class = "form-group">
+        <label class = "control-label col-sm-2">图片选择</label>
+        <div class = "col-sm-4">
+            <input  type = "text" name = "files" class = "form-control" id="text1" >
+        </div>
+    </div>
+    <div class = "form-group">
+        <div class = "col-sm-offset-2 col-sm-4">
+            <button class = "btn btn-primary" onClick = "sou()">查询</button>
+            <span class = "help-inline" id = "spanMessage">选择图片</span>
+        </div>
+    </div>
+</form>
+
+
+
+
+</body>
+
+</html>

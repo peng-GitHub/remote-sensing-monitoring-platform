@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Simple Image Service</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.15/esri/css/esri.css" />
+
+    <style>
+         #map { height: 50%; width: 50%; margin: 0; padding: 0; }
+        #sousuo{height: 110px;width: 120px}
+    </style>
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+
+
+
+    <script src="https://js.arcgis.com/3.15/"></script>
+    <script src="/javascripts/Scripts/test/test.js" type="text/javascript"></script>
+    <script>
+        var map;
+       // var url=url;
+        require([
+            "esri/map", "esri/layers/ArcGISImageServiceLayer",
+            "esri/layers/ImageServiceParameters", "dojo/parser", "dojo/domReady!"
+        ], function(
+                Map, ArcGISImageServiceLayer,
+                ImageServiceParameters, parser
+        ) {
+            parser.parse();
+
+            map = new Map("map", {
+                basemap: "topo",
+                center: [-79.40, 43.64],
+                zoom: 12
+            });
+
+            var params = new ImageServiceParameters();
+            params.noData = 0;
+
+            var imageServiceLayer = new ArcGISImageServiceLayer(url1, {
+                imageServiceParameters: params,
+                opacity: 0.75
+            });
+            map.addLayer(imageServiceLayer);
+        });
+    </script>
+
+</head>
+
+<body>
+
+<div id="map" > </div>
+
+<form class = "form-horizontal"  method='post' action='javascript:' role = "form" id = "frmUploadFile">
+    <div class = "form-group">
+        <label class = "control-label col-sm-2">图片选择</label>
+        <div class = "col-sm-4">
+            <input  type = "text" name = "files" class = "form-control" id="text1" >
+        </div>
+    </div>
+    <div class = "form-group">
+        <div class = "col-sm-offset-2 col-sm-4">
+            <button class = "btn btn-primary" onClick = "sou()">查询</button>
+            <span class = "help-inline" id = "spanMessage">选择图片</span>
+        </div>
+    </div>
+</form>
+<img  id="banner"  src="images/3.png"  width="420px" height="420px" >
+
+
+</body>
+
+</html>

@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <title>Demonstration Of Water Quality Monitoring</title>
+
+    <script src="/javascripts/Scripts/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/javascripts/Scripts/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/javascripts/Scripts/jstree/jstree.min.js"></script>
+    <script src="/javascripts/Scripts/pagecontent/syspage.js"></script>
+    <script src="/javascripts/Scripts/bootstrapdtpicker/bootstrap-datetimepicker.min.js"></script>
+    <script src="/javascripts/Scripts/bootstrapdtpicker/bootstrap-datetimepicker.zh-CN.js"></script>
+
+
+
+    <link href="/stylesheets/css/bootstrapdtpicker/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css"  />
+    <link href="/stylesheets/css/jstree/style.min.css" rel="stylesheet" type="text/css"  />
+    <link href="/stylesheets/css/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css"   />
+    <link href="/stylesheets/css/ace/ace.min.css" rel="stylesheet" type="text/css" />
+    <link href="/stylesheets/css/font-awesome/font-awesome.min.css" rel="stylesheet"
+          type="text/css" />
+
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/dijit/themes/claro/claro.css" type="text/css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/esri/css/esri.css" type="text/css"  />
+    <script src="http://js.arcgis.com/3.13/"></script>
+    <script>
+        var map, csv, tb,imageServiceLayer
+        require([
+            "esri/map", "esri/dijit/Search", "esri/toolbars/draw", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol",
+            "esri/symbols/PictureFillSymbol", "esri/symbols/CartographicLineSymbol",
+            "esri/graphic",
+            "esri/Color", "dojo/dom", "dojo/on", "esri/dijit/OverviewMap",
+
+            "esri/layers/CSVLayer",
+            "esri/Color",
+            "esri/symbols/SimpleMarkerSymbol",
+            "esri/renderers/SimpleRenderer",
+            "esri/InfoTemplate",
+            "esri/urlUtils",
+            "dijit/layout/TabContainer", "dijit/layout/ContentPane",'dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore',
+            "dojo/domReady!"
+        ], function (
+            Map, Search, Draw,
+            SimpleMarkerSymbol, SimpleLineSymbol,
+            PictureFillSymbol, CartographicLineSymbol,
+            Graphic,
+            Color, dom, on, OverviewMap,
+            CSVLayer,Color, SimpleMarkerSymbol, SimpleRenderer, InfoTemplate, urlUtils,TabContainer,ContentPane
+            ,lang, DataGrid, ItemFileWriteStore  ) {
+            /*
+
+             var tc = new TabContainer({
+             style: "height: 100%; width: 100%;"
+             }, "tc1-prog");
+
+             var cp1 = new ContentPane({
+             title: "lantsat数据显示",
+             content: ""
+             });
+             tc.addChild(cp1);
+
+             tc.startup();
+
+             */
+
+            var tc1 = new TabContainer({
+                style: "height: 100%; width: 100%;"
+            }, "tc1-prog1");
+
+            var cp11 = new ContentPane({
+                title: "landsat数据"
+                //content: ""
+            },"test11");
+            tc1.addChild(cp11);
+
+            var cp12 = new ContentPane({
+                title: "modis数据"
+                //content: ""
+            },"test12");
+
+            tc1.addChild(cp12);
+
+            tc1.startup();
+            /*
+
+             var tc2 = new TabContainer({
+             style: "height: 100%; width: 100%;"
+             }, "tc1-prog2");
+
+
+             var cp12 = new ContentPane({
+             title: "modis数据",
+             content: ""
+             });
+             tc2.addChild(cp12);
+
+             tc2.startup();
+             */
+
+            var tc3 = new TabContainer({
+                style: "height: 100%; width: 100%;"
+            }, "tc1-prog3");
+
+            var cp13 = new ContentPane({
+                title: "反演结果",
+                content: ""
+            });
+            tc3.addChild(cp13);
+
+            tc3.startup();
+
+
+            var data = {
+                identifier: "",
+                items: []
+            };
+            /*
+
+             var data_list = [
+             { col1: "normal", col2: false, col3: 'But are not followed by two hexadecimal', col4: 29.91},
+             { col1: "important", col2: false, col3: 'Because a % sign always indicates', col4: 9.33},
+             { col1: "important", col2: false, col3: 'Signs can be selectively', col4: 19.34}
+             ];
+             */
+
+            //var data_list=data.FullData
+
+            var store = new ItemFileWriteStore({data: data});
+
+
+
+            /*set up layout*/
+            var layout = [[
+                {'name': '编号', 'field': 'id2', 'width': '40px'},
+                {'name': '数据类型', 'field': 'name', 'width': '70px'},
+                {'name': '日期', 'field': 'date', 'width': '200px'},
+                {'name': 'url', 'field': 'url', 'width': '550px'}
+            ]];
+
+            /*create a new grid*/
+            var grid = new DataGrid({
+                id: 'grid',
+                store: store,
+                structure: layout,
+                rowSelector: '20px'
+
+            });
+
+            var grid1 = new DataGrid({
+                id: 'grid1',
+                store: store,
+                structure: layout,
+                rowSelector: '20px'
+
+            });
+
+            //grid.placeAt("gridDiv");
+            //grid1.placeAt("gridDiv1");
+            grid.placeAt("test11");
+            grid1.placeAt("test12");
+
+            grid.startup();
+            grid1.startup();
+
+
+            var id=dijit.byId('grid');
+            dojo.connect(id,"onRowDblClick",function(e){
+
+                var row = id.getItem(e.rowIndex);
+                var url = grid.store.getValue(row, "url");
+                //var url ="http://localhost:6080/arcgis/rest/services/MyMapService/MapServer";
+                //alert(value);
+
+                showImageservice(url);
+
+
+            });
+
+            //showImageservice(url);
+
+
+            var id1=dijit.byId('grid1');
+            dojo.connect(id1,"onRowDblClick",function(e){
+
+                var row = id1.getItem(e.rowIndex);
+                var url = grid1.store.getValue(row, "url");
+                //alert(url);
+                showImageservice(url);
+
+            });
+
+
+
+
+
+
+            urlUtils.addProxyRule({
+                proxyUrl: "/proxy/",
+                urlPrefix: "earthquake.usgs.gov"
+            });
+
+
+
+
+
+            map = new Map("map", {                         //底图
+                basemap: "topo",
+                center: [110, 31],
+                zoom: 5
+            });
+            // map.on("load", initToolbar);
+
+            /*
+             var s = new Search({                  //搜索功能
+             map: map
+             }, "sousuo");
+             s.startup();
+             */
+
+
+
+            // fill symbol used for extent, polygon and freehand polygon, use a picture fill symbol
+            // the images folder contains additional fill images, other options: sand.png, swamp.png or stiple.png
+
+
+
+            var overviewMapDijit = new OverviewMap({      //鹰眼图
+                map: map,
+                visible: true
+            }, dojo.byId('overviewMapDiv'));
+            overviewMapDijit.startup();
+
+
+
+
+
+
+            csv = new CSVLayer("http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.csv", {                    //csvLayer
+                copyright: "USGS.gov"
+            });
+            var orangeRed = new Color([238, 69, 0, 0.5]); // hex is #ff4500
+            var marker = new SimpleMarkerSymbol("solid", 15, null, orangeRed);
+            var renderer = new SimpleRenderer(marker);
+            csv.setRenderer(renderer);
+            var template = new InfoTemplate("${type}", "${place}");
+            csv.setInfoTemplate(template);
+            map.addLayer(csv);
+        })
+    </script>
+    <script>
+        function sou(){
+
+            var id= $("#startTime").val();
+            var id1=$("#endTime").val();
+            var data_type=$("#data_type").val();
+
+
+            $.ajax({
+                url: '/sou',
+                type: 'get',
+                //data: {id:$('#test1').val()},
+                // data: {id:"123"},
+                //data:"name="+id+"&location=Boston",
+                data:"CheckTimeStart="+id+"&CheckTimeEnd="+id1+"&DataType="+data_type+"&random="+Math.random()+"",
+                async: false,
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function(data){
+                    if(200 === data.code) {
+                        //$("#banner").attr('src', data.msg.url);
+                        //$("#spanMessage").html("success");
+                        //$("#spanMessage").html(data.msg.url);
+                        //var map;
+                        //var url="http://sampleserver6.arcgisonline.com/arcgis/rest/services/Toronto/ImageServer";
+                        //var url=data.msg.url;
+                        var data_list=data.FullData
+                        //alert('hello world');
+                        require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojo/dom','dojo/on', 'dojo/domReady!'],
+                            function(lang, DataGrid, ItemFileWriteStore, dom,on){
+
+                                /*set up data store*/
+                                // on(dom.byId("gridDiv"), "onRowClick", function(e){
+                                // handle the event
+                                // alert(123)
+                                // });
+
+
+
+                                var data = {
+                                    identifier: "id2",
+                                    items: []
+                                };
+                                /*
+
+                                 var data_list = [
+                                 { col1: "normal", col2: false, col3: 'But are not followed by two hexadecimal', col4: 29.91},
+                                 { col1: "important", col2: false, col3: 'Because a % sign always indicates', col4: 9.33},
+                                 { col1: "important", col2: false, col3: 'Signs can be selectively', col4: 19.34}
+                                 ];
+                                 */
+
+                                //var data_list=data.FullData
+                                var rows = 60;
+                                for(var i = 0, l = data_list.length; i < l; i++){
+                                    data.items.push(lang.mixin({ id2: i+1 }, data_list[i]));
+                                }
+                                var newStore = new ItemFileWriteStore({data: data});
+                                if(data_type=="landsat"){
+                                    var grid = dijit.byId("grid");
+                                    grid.setStore(newStore);
+                                }else{
+                                    var grid1 = dijit.byId("grid1");
+                                    grid1.setStore(newStore);
+
+                                }
+
+
+
+
+                                /*set up layout*/
+
+
+                                /*create a new grid*/
+
+
+
+                            });
+                        //url=data.msg.url;
+                        //url="http://sampleserver6.arcgisonline.com/arcgis/rest/services/Toronto/ImageServer";
+                        //$("#spanMessage").html(data.FullData.url1);
+
+                    } else {
+                        $("#spanMessage").html("fail");
+                    }
+                    // console.log('imgUploader upload success, data:', data);
+                },
+                error: function(){
+                    //$("#spanMessage").html("mistake");
+                    alert('您选择的时间不对，请重新选择');
+                }
+            });
+        }
+    </script>
+    <script>
+        function showImageservice(url){
+
+            if (map) {
+                if(imageServiceLayer) {
+
+
+                    // map.graphics.clear();
+                    //var test= map.getLayer(1);
+                    //map.removeLayer(test);
+                    map.removeLayer(imageServiceLayer);
+                }
+            }
+
+            require([
+                //"esri/map", "esri/layers/ArcGISImageServiceLayer",
+                //"esri/layers/ImageServiceParameters", "dojo/parser", "dojo/domReady!"
+                // 2017-2-23注释 "esri/layers/ArcGISImageServiceLayer","esri/layers/ImageServiceParameters"
+                "esri/layers/ArcGISDynamicMapServiceLayer",
+                "esri/layers/ImageParameters"
+            ], function(
+                //Map, ArcGISImageServiceLayer,
+                //ImageServiceParameters, parser
+                //2017-2-23 注释ArcGISImageServiceLayer,ImageServiceParameters
+
+                ArcGISDynamicMapServiceLayer, ImageParameters
+            ) {
+
+                // map.DeleteLayer(imageServiceLayer);
+
+                //map.removeAllLayers();
+                //map.remove(Layer);
+
+
+
+                //2017-2-23注释
+                /* var params = new ImageServiceParameters();
+                 params.noData = 0;
+
+                 imageServiceLayer = new ArcGISImageServiceLayer(url, {
+                 imageServiceParameters: params,
+                 opacity: 0.95
+
+                 });
+                 */
+                var imageParameters = new ImageParameters();
+                imageParameters.noData = 0;
+                //set the image type to PNG24, note default is PNG8.
+
+                //Takes a URL to a non cached map service.
+                imageServiceLayer = new ArcGISDynamicMapServiceLayer(url, {
+                    "opacity" : 0.95,
+                    "imageParameters" : imageParameters
+                });
+
+                //map.addLayer(dynamicMapServiceLayer);
+                map.addLayer(imageServiceLayer);
+                /*setTimeout(function() {
+                 map.removeLayer(imageServiceLayer);
+
+
+                 }, 5000); */
+
+
+
+                // map.remove(imageServiceLayer);
+                // map.removeAllLayers();
+            });
+        }
+    </script>
+
+
+
+</head>
+<body class="claro" style="height: 100%">
+
+<div class="navbar navbar-default" id="navbar">
+    <div class="navbar-container" id="navbar-container">
+        <div class="navbar-header pull-left">
+            <p class="navbar-brand">Demonstration Of Water Quality Monitoring<small id="page_title2" style="font-size:small"> >>>>Signal Processing Lab. </small></p>
+        </div>
+    </div>
+</div>
+<div class="main-container" id="main-container" >
+    <div class="main-container-inner">
+        <a class="menu-toggler" id="menu-toggler" href="#">
+            <span class="menu-text"></span>
+        </a>
+        <div class="main-content">
+
+            <div class="page-content">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <!-- PAGE CONTENT BEGINS -->
+                        <div class="col-sm-2 no-padding-right">
+                            <div class="widget-box">
+                                <div class="widget-header">
+                                    <h4>地图选择</h4>
+                                </div>
+                                <div class="widget-body">
+                                    <div id="tree">
+
+                                    </div>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="widget-box">
+                                <div class="widget-header">
+                                    <h4>鹰眼</h4>
+                                </div>
+
+                                <div class="widget-body">
+                                    <div id="overviewMapDiv" style="height: 100%;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-8 no-padding-right">
+                            <div class="widget-box">
+                                <div class="widget-header">
+                                    <h4>地图显示</h4>
+                                </div>
+                                <div class="widget-body">
+
+                                    <div id="map" data-dojo-type="dijit.layout.ContentPane">
+
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-2 no-padding-right" >
+
+
+                            <div class="widget-box" >
+                                <div class="widget-header">
+                                    <h4>功能区域</h4>
+                                </div>
+                                <div class="widget-body" style="height: 200px " >
+                                    <div id="search">
+                                        <!--
+                                        <br />
+                                        <div id="sousuo" class="form-group col-sm-10 col-sm-offset-1"></div>
+                                        -->
+                                        <br  />
+
+
+
+                                        <div class="col-sm-12 form-group">
+                                            <label class="col-sm-5 no-padding-right control-label text-right">
+                                                数据类型：
+                                            </label>
+                                            <!--
+                                            <input type="text" class="col-sm-7 dtpicker" name="Icon" />
+                                              -->
+
+                                            <select name="dataType" id="data_type" class="col-sm-7">
+                                                <option value="landsat">landsat</option>
+                                                <option value="modis">modis</option>
+                                            </select>
+
+                                        </div>
+
+
+                                        <div class="col-sm-12 form-group">
+
+                                            <label class="col-sm-5 no-padding-right control-label text-right">
+                                                开始时间：
+                                            </label>
+                                            <input type="text" class="col-sm-7 dtpicker" name="Icon" id="startTime" />
+
+                                        </div>
+
+                                        <div class="col-sm-12 form-group">
+
+                                            <label class="col-sm-5 no-padding-right control-label text-right">
+                                                结束时间：
+                                            </label>
+                                            <input type="text" class="col-sm-7 dtpicker" name="Icon" id="endTime" />
+
+                                        </div>
+
+                                        <div class="col-sm-12 form-group">
+                                            <label class="col-sm-5 no-padding-right control-label text-right">
+                                                查询地点：
+                                            </label>
+                                            <select name="field" id="data_field" class="col-sm-4">
+                                                <option value="武汉">武汉</option>
+                                                <option value="上海">上海</option>
+                                            </select>
+                                            <button class=" col-sm-3" onclick="sou()">查询</button>
+
+                                        </div>
+
+
+                                    </div>
+                                </div>
+                            </div><!-- 这里结束 -->
+
+                            <div style="width: 100%; height: 200px">
+                                <div id="tc1-prog1"style="width: 100%; height: 100%">
+                                    <div id="test11" style="width: 100%; height: 100%">
+                                        <!--
+                                    <div id="gridDiv" style="width: 244px; height: 160px"></div>
+                                    -->
+                                    </div>
+                                    <div id="test12" style="width: 100%; height: 100%" >
+                                        <!--
+                                        <div id="gridDiv1" style="width: 244px; height: 160px"></div>
+                                        -->
+
+                                    </div>
+
+                                </div>
+                            </div>
+                            <!--
+                            <div style="width: 250px; height: 200px">
+                                <div id="tc1-prog2">
+                                    <div id="gridDiv1" style="width: 244px; height: 160px"></div>
+
+                                </div>
+                            </div>
+                               -->
+                            <div style="width: 100%; height: 200px">
+                                <div id="tc1-prog3">
+
+
+                                </div>
+                            </div>
+
+
+
+
+
+                        </div>
+                    </div>
+                    <!-- PAGE CONTENT ENDS -->
+                </div>
+                <!-- /.col -->
+            </div>
+            <!-- /.row -->
+        </div>
+        <!-- /.page-content -->
+    </div>
+    <!-- /.main-content -->
+</div>
+
+<!-- /.main-container-inner -->
+<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
+    <i class="icon-double-angle-up icon-only bigger-110"></i>
+</a>
+
+
+
+
+<!-- /.main-container -->
+
+</body>
+</html>

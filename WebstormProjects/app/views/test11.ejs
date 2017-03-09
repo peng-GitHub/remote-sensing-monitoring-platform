@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <title>Demonstration Of Water Quality Monitoring</title>
+
+    <script src="/javascripts/Scripts/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/javascripts/Scripts/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/javascripts/Scripts/jstree/jstree.min.js"></script>
+    <script src="/javascripts/Scripts/pagecontent/syspage.js"></script>
+    <script src="/javascripts/Scripts/bootstrapdtpicker/bootstrap-datetimepicker.min.js"></script>
+    <script src="/javascripts/Scripts/bootstrapdtpicker/bootstrap-datetimepicker.zh-CN.js"></script>
+
+
+
+    <link href="/stylesheets/css/bootstrapdtpicker/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css"  />
+    <link href="/stylesheets/css/jstree/style.min.css" rel="stylesheet" type="text/css"  />
+    <link href="/stylesheets/css/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css"   />
+    <link href="/stylesheets/css/ace/ace.min.css" rel="stylesheet" type="text/css" />
+    <link href="/stylesheets/css/font-awesome/font-awesome.min.css" rel="stylesheet"
+          type="text/css" />
+
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/dijit/themes/claro/claro.css" type="text/css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/esri/css/esri.css" type="text/css"  />
+    <script src="http://js.arcgis.com/3.13/"></script>
+    <script>
+        require(['dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore', 'dojo/dom','dojo/on', 'dojo/domReady!'],
+                function(lang, DataGrid, ItemFileWriteStore, dom,on){
+
+                    /*set up data store*/
+                   // on(dom.byId("gridDiv"), "onRowClick", function(e){
+                        // handle the event
+                       // alert(123)
+                   // });
+                    var data = {
+                        identifier: "id",
+                        items: []
+                    };
+                    var data_list = [
+                        { col1: "normal", col2: false, col3: 'But are not followed by two hexadecimal', col4: 29.91},
+                        { col1: "important", col2: false, col3: 'Because a % sign always indicates', col4: 9.33},
+                        { col1: "important", col2: false, col3: 'Signs can be selectively', col4: 19.34}
+                    ];
+                    var rows = 60;
+                    for(var i = 0, l = data_list.length; i < rows; i++){
+                        data.items.push(lang.mixin({ id: i+1 }, data_list[i%l]));
+                    }
+                    var store = new ItemFileWriteStore({data: data});
+
+                    /*set up layout*/
+                    var layout = [[
+                        {'name': 'Column 1', 'field': 'id', 'width': '100px'},
+                        {'name': 'Column 2', 'field': 'col2', 'width': '100px'},
+                        {'name': 'Column 3', 'field': 'col3', 'width': '200px'},
+                        {'name': 'Column 4', 'field': 'col4', 'width': '150px'}
+                    ]];
+
+                    /*create a new grid*/
+                    var grid = new DataGrid({
+                        id: 'grid',
+                        store: store,
+                        structure: layout,
+                        rowSelector: '20px'
+
+
+
+                    });
+
+                    /*append the new grid to the div*/
+                    grid.placeAt("gridDiv");
+
+                    /*Call startup() to render the grid*/
+                    grid.startup();
+                });
+    </script>
+
+
+
+
+</head>
+<body>
+<div id="gridDiv" style="height:20em"></div>
+</body>
+</html>

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <title>Demonstration Of Water Quality Monitoring</title>
+
+    <script src="/javascripts/Scripts/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/javascripts/Scripts/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/javascripts/Scripts/jstree/jstree.min.js"></script>
+    <script src="/javascripts/Scripts/pagecontent/syspage.js"></script>
+    <script src="/javascripts/Scripts/bootstrapdtpicker/bootstrap-datetimepicker.min.js"></script>
+    <script src="/javascripts/Scripts/bootstrapdtpicker/bootstrap-datetimepicker.zh-CN.js"></script>
+
+
+
+    <link href="/stylesheets/css/bootstrapdtpicker/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css"  />
+    <link href="/stylesheets/css/jstree/style.min.css" rel="stylesheet" type="text/css"  />
+    <link href="/stylesheets/css/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css"   />
+    <link href="/stylesheets/css/ace/ace.min.css" rel="stylesheet" type="text/css" />
+    <link href="/stylesheets/css/font-awesome/font-awesome.min.css" rel="stylesheet"
+          type="text/css" />
+
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/dijit/themes/claro/claro.css" type="text/css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/esri/css/esri.css" type="text/css"  />
+
+
+
+</head>
+<body>
+
+<div class="navbar navbar-default" id="navbar">
+    <div class="navbar-container" id="navbar-container">
+        <div class="navbar-header pull-left">
+            <a href="/Home" class="navbar-brand">Demonstration Of Water Quality Monitoring<small id="page_title2" style="font-size:small"> >>>>Signal Processing Lab. </small></a>
+        </div>
+    </div>
+</div>
+<div class="main-container" id="main-container">
+    <div class="main-container-inner">
+        <a class="menu-toggler" id="menu-toggler" href="#">
+            <span class="menu-text"></span>
+        </a>
+        <div class="main-content">
+
+            <div class="page-content">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <!-- PAGE CONTENT BEGINS -->
+                        <div class="col-sm-2 no-padding-right">
+                            <div class="widget-box">
+                                <div class="widget-header">
+                                    <h4>地图选择</h4>
+                                </div>
+                                <div class="widget-body">
+                                    <div id="tree"></div>
+                                </div>
+                            </div>
+                            <br />
+                            <div class="widget-box">
+                                <div class="widget-header">
+                                    <h4>鹰眼</h4>
+                                </div>
+
+                                <div class="widget-body">
+                                    <div id="overviewMapDiv" style="height: 100%;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-8 no-padding-right">
+                            <div class="widget-box">
+                                <div class="widget-header">
+                                    <h4>地图显示</h4>
+                                </div>
+                                <div class="widget-body">
+
+                                    <div id="map" data-dojo-type="dijit.layout.ContentPane">
+                                        <script src="http://js.arcgis.com/3.13/"></script>
+                                        <script>
+                                            var map, csv, tb;
+                                            require([
+                                                "esri/map", "esri/dijit/Search", "esri/toolbars/draw", "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol",
+                                                "esri/symbols/PictureFillSymbol", "esri/symbols/CartographicLineSymbol",
+                                                "esri/graphic",
+                                                "esri/Color", "dojo/dom", "dojo/on", "esri/dijit/OverviewMap",
+
+                                                "esri/layers/CSVLayer",
+                                                "esri/Color",
+                                                "esri/symbols/SimpleMarkerSymbol",
+                                                "esri/renderers/SimpleRenderer",
+                                                "esri/InfoTemplate",
+                                                "esri/urlUtils",
+                                                "dijit/layout/BorderContainer", "dijit/layout/ContentPane",
+                                                "dojo/domReady!"
+                                            ], function (
+                                                    Map, Search, Draw,
+                                                    SimpleMarkerSymbol, SimpleLineSymbol,
+                                                    PictureFillSymbol, CartographicLineSymbol,
+                                                    Graphic,
+                                                    Color, dom, on, OverviewMap,
+                                                     CSVLayer,Color, SimpleMarkerSymbol, SimpleRenderer, InfoTemplate, urlUtils
+                                            ) {
+                                                urlUtils.addProxyRule({
+                                                    proxyUrl: "/proxy/",
+                                                    urlPrefix: "earthquake.usgs.gov"
+                                                });
+
+                                                on(dom.byId("clearGraphics"), "click", function () {               //clear
+                                                    if (map) {
+                                                        map.graphics.clear();
+                                                    }
+                                                });
+
+
+                                                map = new Map("map", {                         //底图
+                                                    basemap: "topo",
+                                                    center: [130, 31],
+                                                    zoom: 9
+                                                });
+                                                map.on("load", initToolbar);
+
+                                                var s = new Search({                  //搜索功能
+                                                    map: map
+                                                }, "sousuo");
+                                                s.startup();
+
+                                                var markerSymbol = new SimpleMarkerSymbol();                     //自定义点线面
+                                                markerSymbol.setPath("M16,4.938c-7.732,0-14,4.701-14,10.5c0,1.981,0.741,3.833,2.016,5.414L2,25.272l5.613-1.44c2.339,1.316,5.237,2.106,8.387,2.106c7.732,0,14-4.701,14-10.5S23.732,4.938,16,4.938zM16.868,21.375h-1.969v-1.889h1.969V21.375zM16.772,18.094h-1.777l-0.176-8.083h2.113L16.772,18.094z");
+                                                markerSymbol.setColor(new Color("#00FFFF"));
+
+                                                // lineSymbol used for freehand polyline, polyline and line.
+                                                var lineSymbol = new CartographicLineSymbol(
+                                                        CartographicLineSymbol.STYLE_SOLID,
+                                                        new Color([255, 0, 0]), 10,
+                                                        CartographicLineSymbol.CAP_ROUND,
+                                                        CartographicLineSymbol.JOIN_MITER, 5
+                                                );
+
+                                                // fill symbol used for extent, polygon and freehand polygon, use a picture fill symbol
+                                                // the images folder contains additional fill images, other options: sand.png, swamp.png or stiple.png
+                                                var fillSymbol = new PictureFillSymbol(
+                                                        "images/mangrove.png",
+                                                        new SimpleLineSymbol(
+                                                                SimpleLineSymbol.STYLE_SOLID,
+                                                                new Color('#000'),
+                                                                1
+                                                        ),
+                                                        42,
+                                                        42
+                                                );
+
+                                                function initToolbar() {
+                                                    tb = new Draw(map);
+                                                    tb.on("draw-end", addGraphic);
+
+                                                    // event delegation so a click handler is not
+                                                    // needed for each individual button
+                                                    on(dom.byId("info"), "click", function (evt) {
+                                                        if (evt.target.id === "info") {
+                                                            return;
+                                                        }
+                                                        var tool = evt.target.id.toLowerCase();
+                                                        map.disableMapNavigation();
+                                                        tb.activate(tool);
+                                                    });
+                                                }
+
+                                                function addGraphic(evt) {
+                                                    //deactivate the toolbar and clear existing graphics
+                                                    tb.deactivate();
+                                                    map.enableMapNavigation();
+
+                                                    // figure out which symbol to use
+                                                    var symbol;
+                                                    if (evt.geometry.type === "point" || evt.geometry.type === "multipoint") {
+                                                        symbol = markerSymbol;
+                                                    } else if (evt.geometry.type === "line" || evt.geometry.type === "polyline") {
+                                                        symbol = lineSymbol;
+                                                    }
+                                                    else {
+                                                        symbol = fillSymbol;
+                                                    }
+
+                                                    map.graphics.add(new Graphic(evt.geometry, symbol));
+                                                }
+
+                                                var overviewMapDijit = new OverviewMap({      //鹰眼图
+                                                    map: map,
+                                                    visible: true
+                                                }, dojo.byId('overviewMapDiv'));
+                                                overviewMapDijit.startup();
+
+
+
+
+
+
+                                                csv = new CSVLayer("http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.csv", {                    //csvLayer
+                                                    copyright: "USGS.gov"
+                                                });
+                                                var orangeRed = new Color([238, 69, 0, 0.5]); // hex is #ff4500
+                                                var marker = new SimpleMarkerSymbol("solid", 15, null, orangeRed);
+                                                var renderer = new SimpleRenderer(marker);
+                                                csv.setRenderer(renderer);
+                                                var template = new InfoTemplate("${type}", "${place}");
+                                                csv.setInfoTemplate(template);
+                                                map.addLayer(csv);
+                                            })
+                                        </script>
+                                        <script>
+                                            function sou(){
+
+                                                var id= $("#text1").val();
+
+                                                $.ajax({
+                                                    url: '/sou',
+                                                    type: 'get',
+                                                    //data: {id:$('#test1').val()},
+                                                    // data: {id:"123"},
+                                                    //data:"name="+id+"&location=Boston",
+                                                    data:"name="+id+"&location=Boston",
+                                                    async: false,
+                                                    cache: false,
+                                                    contentType: false,
+                                                    processData: false,
+                                                    success: function(data){
+                                                        if(200 === data.code) {
+                                                            //$("#banner").attr('src', data.msg.url);
+                                                            //$("#spanMessage").html("success");
+                                                            //$("#spanMessage").html(data.msg.url);
+                                                            //var map;
+                                                            //var url="http://sampleserver6.arcgisonline.com/arcgis/rest/services/Toronto/ImageServer";
+                                                            var url=data.msg.url;
+                                                            //alert('hello world');
+                                                            require([
+                                                                //"esri/map", "esri/layers/ArcGISImageServiceLayer",
+                                                                //"esri/layers/ImageServiceParameters", "dojo/parser", "dojo/domReady!"
+                                                                "esri/layers/ArcGISImageServiceLayer","esri/layers/ImageServiceParameters"
+
+                                                            ], function(
+                                                                    //Map, ArcGISImageServiceLayer,
+                                                                    //ImageServiceParameters, parser
+                                                                    ArcGISImageServiceLayer,ImageServiceParameters
+                                                            ) {
+
+
+                                                                var params = new ImageServiceParameters();
+                                                                params.noData = 0;
+
+                                                                var imageServiceLayer = new ArcGISImageServiceLayer(url, {
+                                                                    imageServiceParameters: params,
+                                                                    opacity: 0.75
+                                                                });
+                                                                map.addLayer(imageServiceLayer);
+                                                            });
+                                                            //url=data.msg.url;
+                                                            //url="http://sampleserver6.arcgisonline.com/arcgis/rest/services/Toronto/ImageServer";
+
+
+                                                        } else {
+                                                            $("#spanMessage").html("fail");
+                                                        }
+                                                       // console.log('imgUploader upload success, data:', data);
+                                                    },
+                                                    error: function(){
+                                                        //$("#spanMessage").html("mistake");
+                                                        alert('您选择的时间不对，请重新选择');
+                                                    }
+                                                });
+                                            }
+                                        </script>
+
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-2 no-padding-right">
+                            <div class="widget-box">
+                                <div class="widget-header">
+                                    <h4>功能区域</h4>
+                                </div>
+                                <div class="widget-body">
+                                    <div id="search">
+                                        <br />
+                                        <div id="sousuo" class="form-group col-sm-10 col-sm-offset-1"></div>
+                                        <br />
+                                        <div class="col-sm-12 form-group">
+                                            <label class="col-sm-5 no-padding-right control-label text-right">
+                                                平台：
+                                            </label>
+                                            <select class="col-sm-7">
+                                                <option>Arcgis地图</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-12 form-group">
+                                            <label class="col-sm-5 no-padding-right control-label text-right">
+                                                起始时间：
+                                            </label>
+                                            <input type="text" class="col-sm-7 dtpicker" name="Icon" id="text1" />
+
+                                        </div>
+                                        <div class="col-sm-12 form-group">
+                                            <label class="col-sm-5 no-padding-right control-label text-right">
+                                                结束时间：
+                                            </label>
+                                            <input type="text" class="col-sm-7 dtpicker" name="Icon" />
+                                        </div>
+                                        <div class="col-sm-12 form-group">
+                                            <label class="col-sm-5 no-padding-right control-label text-right">
+                                                X：
+                                            </label>
+                                            <input type="text" class="col-sm-7" name="Icon" />
+                                        </div>
+                                        <div class="col-sm-12 form-group">
+                                            <label class="col-sm-5 no-padding-right control-label text-right">
+                                                Y：
+                                            </label>
+                                            <input type="text" class="col-sm-7" name="Icon" />
+                                        </div>
+
+                                        <div class="col-sm-12 form-group" id="info">
+                                            <div class="col-sm-12 form-group text-right">
+                                                <div class="col-sm-5"></div>
+                                                <button class="btn btn-primary btn-sm col-sm-7" name="btn_save" onClick = "sou()">
+                                                    <i class="icon-search"></i>查询
+                                                </button>
+                                            </div>
+
+                                            <br />
+                                            <br />
+                                            <button id="Point" class="btn btn-primary col-sm-12 form-group">Point(点)</button>
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <button id="Multipoint" class="btn btn-primary col-sm-12 form-group">Multipoint（多点）</button>
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <button id="Line" class="btn btn-primary col-sm-12 form-group">Line（线）</button>
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <button id="Polyline" class="btn btn-primary col-sm-12 form-group">Polyline（多线）</button>
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <button id="FreehandPolyline" class="btn btn-primary col-sm-12 form-group">Freehand Polyline（手绘多线）</button>
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <button type="button" id="clearGraphics" class="btn btn-primary col-sm-12 form-group">Clear Graphics（清除绘图）</button>
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <button id="Triangle" class="btn btn-primary col-sm-12 form-group" >Triangle（三角形）</button>
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <button id="Extent" class="btn btn-primary col-sm-12 form-group">Rectangle（长方形）</button>
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <button id="Circle" class="btn btn-primary col-sm-12 form-group">Circle（圆）</button>
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <button id="Ellipse" class="btn btn-primary col-sm-12 form-group">Ellipse（椭圆）</button>
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <button id="Polygon" class="btn btn-primary col-sm-12 form-group">Polygon（多边形）</button>
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <button id="FreehandPolygon" class="btn btn-primary col-sm-12 form-group">Freehand Polygon（手绘多边形）</button>
+                                            <br />
+                                            <br />
+                                            <br />
+                                            <br />
+
+
+
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- PAGE CONTENT ENDS -->
+                    </div>
+                    <!-- /.col -->
+                </div>
+                <!-- /.row -->
+            </div>
+            <!-- /.page-content -->
+        </div>
+        <!-- /.main-content -->
+    </div>
+    <!-- /.main-container-inner -->
+    <a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
+        <i class="icon-double-angle-up icon-only bigger-110"></i>
+    </a>
+</div>
+<div id="spanMessage">
+</div>
+<!-- /.main-container -->
+
+
+</body>
+</html>

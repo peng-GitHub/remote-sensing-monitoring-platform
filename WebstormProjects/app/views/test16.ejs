@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <title>Demonstration Of Water Quality Monitoring</title>
+
+    <script src="/javascripts/Scripts/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/javascripts/Scripts/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/javascripts/Scripts/jstree/jstree.min.js"></script>
+    <script src="/javascripts/Scripts/pagecontent/syspage.js"></script>
+    <script src="/javascripts/Scripts/bootstrapdtpicker/bootstrap-datetimepicker.min.js"></script>
+    <script src="/javascripts/Scripts/bootstrapdtpicker/bootstrap-datetimepicker.zh-CN.js"></script>
+
+
+
+    <link href="/stylesheets/css/bootstrapdtpicker/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css"  />
+    <link href="/stylesheets/css/jstree/style.min.css" rel="stylesheet" type="text/css"  />
+    <link href="/stylesheets/css/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css"   />
+    <link href="/stylesheets/css/ace/ace.min.css" rel="stylesheet" type="text/css" />
+    <link href="/stylesheets/css/font-awesome/font-awesome.min.css" rel="stylesheet"
+          type="text/css" />
+
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/dijit/themes/claro/claro.css" type="text/css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/dijit/themes/claro/layout/ContentPane.css" type="text/css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/dijit/themes/claro/layout/TabContainer.css" type="text/css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/esri/css/esri.css" type="text/css"  />
+    <script src="http://js.arcgis.com/3.13/"></script>
+    <script>
+        require(["dijit/layout/TabContainer", "dijit/layout/ContentPane",
+            'dojo/_base/lang', 'dojox/grid/DataGrid', 'dojo/data/ItemFileWriteStore',"dojo/dom", "dojo/on", "dojo/domReady!"],
+                function(TabContainer, ContentPane,lang, DataGrid, ItemFileWriteStore,dom,on){
+            var tc = new TabContainer({
+                style: "height: 100%; width: 100%;"
+            }, "tc1-prog");
+
+            var cp1 = new ContentPane({
+                title: "First Tab",
+                content: "We offer amazing food"
+            });
+            tc.addChild(cp1);
+
+            tc.startup();
+
+
+                    var tc1 = new TabContainer({
+                        style: "height: 100%; width: 100%;"
+                    }, "tc1-prog1");
+
+                    var cp11 = new ContentPane({
+                        title: "First1 Tab"
+                        //content: "We offer amazing food"
+                    });
+                    tc1.addChild(cp11);
+
+                   /* var cp12 = new ContentPane({
+                        title: "First1 Tab"
+                        //content: "We offer amazing food"
+                    },'test2');
+                    tc1.addChild(cp12);
+                    */
+
+                    tc1.startup();
+
+
+                    var data = {
+                        identifier: "id2",
+                        items: []
+                    };
+
+                    var data_list = [
+                        { id: "normal", col2: false, col3: 'But are not ', col4: 29.9111313134646146313464155555555541646163464616154456},
+                        { id: "important", col2: false, col3: 'Because a sing song soang', col4: 9.33},
+                        { id: "important", col2: false, col3: 'Signs can', col4: 19.34}
+                    ];
+                    var rows = 60;
+                    for(var i = 0, l = data_list.length; i < l; i++){
+                        data.items.push(lang.mixin({ id2: i+1 }, data_list[i]));
+                        // data.items.push( data_list[i]);
+                        //data.items.push(lang.mixin(data_list[i]));
+                    }
+
+
+                    var store = new ItemFileWriteStore({data: data});
+
+                    /*set up layout*/
+                    var layout = [[
+                        {'name': 'Column 1', 'field': 'id'     },
+                        {'name': 'Column 2', 'field': 'col2'  },
+                        {'name': 'Column 3', 'field': 'col3'   },
+                        {'name': 'Column 4', 'field': 'col4','width':'400px' }
+                    ]];
+
+                    /*create a new grid*/
+
+
+                    var grid = new DataGrid({
+                        id: 'grid',
+                        store: store,
+                        structure: layout,
+                        rowSelector: '20px'
+
+                    });
+
+                    var grid1 = new DataGrid({
+                        id: 'grid1',
+                        store: store,
+                        structure: layout,
+                        rowSelector: '20px'
+
+                    });
+
+
+                    /*append the new grid to the div*/
+
+                    grid.placeAt("gridDiv");
+                    grid1.placeAt("gridDiv1");
+
+
+
+                    /*Call startup() to render the grid*/
+                    grid.startup();
+                    grid1.startup();
+
+                    var id=dijit.byId('grid');
+                    dojo.connect(id,"onRowDblClick",function(e){
+
+                        var row = id.getItem(e.rowIndex);
+                        var value = grid.store.getValue(row, "col3");
+                        alert(value);
+                        //var item = e.grid.getItem(e.rowIndex);
+
+                    });
+
+                    //var id1=dijit.byId('grid1');
+                    //dojo.connect(id1,"onRowDblClick",test);
+
+
+
+
+
+
+
+        });
+    </script>
+    <script>
+
+        function onlick(){
+            $('#gridDiv')[0].innerHTML='';
+
+        }
+    </script>
+</head>
+<body class="claro">
+<br />
+<br />
+<br />
+
+<div style="width: 350px; height: 300px">
+    <div id="tc1-prog">
+</div>
+    <div id="tc1-prog1">
+    </div>
+<!--
+
+<div style="width: 350px; height: 300px">
+    <div id="tc1-prog1">
+        <div id="test1">
+            <div id="gridDiv" style="height:20em"></div>
+
+        </div>
+
+        <div id="test2">
+            <div id="gridDiv1" style="height:20em"></div>
+
+            </div>
+        </div>
+
+    </div>
+    -->
+
+</div>
+<div id="gridDiv">
+
+    </div>
+<div id="gridDiv1">
+    </div>
+<button onclick="onlick()">click me</button>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <title>Demonstration Of Water Quality Monitoring</title>
+
+    <script src="/javascripts/Scripts/jquery/jquery-1.10.2.min.js" type="text/javascript"></script>
+    <script src="/javascripts/Scripts/bootstrap/bootstrap.min.js" type="text/javascript"></script>
+    <script src="/javascripts/Scripts/jstree/jstree.min.js"></script>
+    <script src="/javascripts/Scripts/pagecontent/syspage.js"></script>
+    <script src="/javascripts/Scripts/bootstrapdtpicker/bootstrap-datetimepicker.min.js"></script>
+    <script src="/javascripts/Scripts/bootstrapdtpicker/bootstrap-datetimepicker.zh-CN.js"></script>
+
+
+
+    <link href="/stylesheets/css/bootstrapdtpicker/bootstrap-datetimepicker.min.css" rel="stylesheet" type="text/css"  />
+    <link href="/stylesheets/css/jstree/style.min.css" rel="stylesheet" type="text/css"  />
+    <link href="/stylesheets/css/bootstrap/bootstrap.min.css" rel="stylesheet" type="text/css"   />
+    <link href="/stylesheets/css/ace/ace.min.css" rel="stylesheet" type="text/css" />
+    <link href="/stylesheets/css/font-awesome/font-awesome.min.css" rel="stylesheet"
+          type="text/css" />
+
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/dijit/themes/claro/claro.css" type="text/css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/dijit/themes/claro/layout/ContentPane.css" type="text/css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/dijit/themes/claro/layout/TabContainer.css" type="text/css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.13/esri/css/esri.css" type="text/css"  />
+    <script src="http://js.arcgis.com/3.13/"></script>
+    <script>
+    require(["dijit/layout/TabContainer", "dijit/layout/ContentPane", "dojo/domReady!"], function(TabContainer, ContentPane){
+    var tc = new TabContainer({
+    style: "height: 100%; width: 100%;"
+    }, "tc1-prog");
+
+    var cp1 = new ContentPane({
+    title: "First Tab",
+    content: "We offer amazing food"
+    });
+    tc.addChild(cp1);
+
+    tc.startup();
+    });
+    </script>
+    </head>
+<body class="claro">
+<br />
+<br />
+<br />
+
+<div style="width: 350px; height: 300px">
+    <div id="tc1-prog"></div>
+</div>
+<p> here </p>
+</body>
+</html>
